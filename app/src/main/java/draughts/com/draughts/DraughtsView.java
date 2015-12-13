@@ -1,16 +1,20 @@
 package draughts.com.draughts;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-public class DraughtsView extends View {
+public class DraughtsView extends View implements View.OnTouchListener {
     private Context mContext;
     private int mViewHeight;
     private int mBoardSize = 8;
@@ -25,6 +29,9 @@ public class DraughtsView extends View {
     private int mInValidPlace = -1;
     private int mRedPiece = 1;
     private int mWhitePiece = 2;
+    private String TAG = "DraughtsView";
+    private float STATUS_BAR_HEIGHT = 24;
+    private float mStatusBarHeightPixels;
 
     public DraughtsView(Context context) {
         super(context);
@@ -43,6 +50,7 @@ public class DraughtsView extends View {
 
     private void init(Context context) {
         mContext = context;
+        this.setOnTouchListener(this);
         WindowManager wm = (WindowManager) context
                 .getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
@@ -58,6 +66,8 @@ public class DraughtsView extends View {
 
         mWhitePaint.setColor(Color.WHITE);
         mRedPaint.setColor(Color.RED);
+        Resources r = getResources();
+        mStatusBarHeightPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, STATUS_BAR_HEIGHT, r.getDisplayMetrics());
         resetBoard();
     }
 
@@ -129,5 +139,29 @@ public class DraughtsView extends View {
             }
         }
         canvas.drawLine(0, mHeightOfCell * mBoardSize, mViewHeight, mHeightOfCell * mBoardSize, mBlackStroke);
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        int xMaxTouchValue = mHeightOfCell * 2 * mBoardSize;
+        int yMaxTouchValue = mHeightOfCell * 2 * mBoardSize;
+        int xMinTouchValue = 4;
+        float yminTouchValue = mStatusBarHeightPixels;
+        float xTouchedValue = motionEvent.getRawX();
+        float yTouchedValue = motionEvent.getRawY() - yminTouchValue;
+        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+
+            if (xTouchedValue > xMinTouchValue && xTouchedValue < xMaxTouchValue && yTouchedValue > yminTouchValue
+                    && yTouchedValue < yMaxTouchValue) {
+            }
+            int yPosition = (int) (xTouchedValue / (mHeightOfCell));
+            int xPosition = (int) (yTouchedValue / (mHeightOfCell));
+            Log.i(TAG, "X :: " + xPosition + " Y:: " + yPosition);
+            if (xPosition >= mBoardSize || yPosition >= mBoardSize)
+                return true;
+            Log.i(TAG, "Value:: " + mBoard[xPosition][yPosition]);
+            return true;
+        }
+        return true;
     }
 }
