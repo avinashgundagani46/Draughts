@@ -34,6 +34,12 @@ public class DraughtsView extends View implements View.OnTouchListener {
     private float mStatusBarHeightPixels;
     private int mRedKingPiece = 3;
     private int mWhiteKingPiece = 4;
+    private int mSelectedPiece = 5;
+    private int mYPreviousPosition = -3;
+    private int mXPreviousPosition = -3;
+    private boolean isPlayerOneTurn = true;
+    private boolean invalidateView = false;
+    private Paint mSelectedPaint = new Paint();
 
     public DraughtsView(Context context) {
         super(context);
@@ -65,6 +71,8 @@ public class DraughtsView extends View implements View.OnTouchListener {
 
         mGreenPaint.setStrokeWidth(3);
         mGreenPaint.setColor(mContext.getResources().getColor(R.color.colorGreenCell));
+
+        mSelectedPaint.setColor(mContext.getResources().getColor(R.color.colorPrimaryDark));
 
         mWhitePaint.setColor(Color.WHITE);
         mRedPaint.setColor(Color.RED);
@@ -131,18 +139,23 @@ public class DraughtsView extends View implements View.OnTouchListener {
         // Drawing pieces based on their values
         for (int x = 0; x < mBoardSize; x++) {
             for (int y = 0; y < mBoardSize; y++) {
+                // Selected cell
+                if (mBoard[x][y] == 5) {
+                    rect = new Rect(mHeightOfCell * y, mHeightOfCell * x, mHeightOfCell * y + mHeightOfCell, mHeightOfCell * x + mHeightOfCell);
+                    canvas.drawRect(rect, mSelectedPaint);
+                }
                // If it is white piece
-                if (mBoard[x][y] == mWhitePiece) {
+                if (mBoard[x][y] == mWhitePiece || (5 == mBoard[x][y] && mSelectedPiece == mWhitePiece)) {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mWhitePaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mBlackStroke);
                 }
                 // If it is red piece
-                else if (mBoard[x][y] == mRedPiece) {
+                else if (mBoard[x][y] == mRedPiece || (5 == mBoard[x][y] && mSelectedPiece == mRedPiece)) {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mRedPaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mBlackStroke);
                 }
                 // If it is white king
-                else if (mBoard[x][y] == mWhiteKingPiece) {
+                else if (mBoard[x][y] == mWhiteKingPiece || (5 == mBoard[x][y] && mSelectedPiece == mWhiteKingPiece)) {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 - mHeightOfCell / 10, mHeightOfCell / 4, mWhitePaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 - mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 , mHeightOfCell / 4, mWhitePaint);
@@ -151,7 +164,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2+ mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
                 }
                 // If it is red king
-                else if (mBoard[x][y] == mRedKingPiece) {
+                else if (mBoard[x][y] == mRedKingPiece || (5 == mBoard[x][y] && mSelectedPiece == mRedKingPiece)) {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 - mHeightOfCell / 10, mHeightOfCell / 4, mRedPaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 - mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mRedPaint);
@@ -166,6 +179,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+        invalidateView = false;
         int xMaxTouchValue = mHeightOfCell * 2 * mBoardSize;
         int yMaxTouchValue = mHeightOfCell * 2 * mBoardSize;
         int xMinTouchValue = 4;
@@ -183,8 +197,77 @@ public class DraughtsView extends View implements View.OnTouchListener {
             if (xPosition >= mBoardSize || yPosition >= mBoardSize)
                 return true;
             Log.i(TAG, "Value:: " + mBoard[xPosition][yPosition]);
+            if (xPosition >= mBoardSize || yPosition >= mBoardSize)
+                return true;
+            // Highlighting the selected piece
+            if (mYPreviousPosition == -3) {
+                if (mBoard[xPosition][yPosition] != mWhitePiece && mBoard[xPosition][yPosition] != mRedPiece
+                        && mBoard[xPosition][yPosition] != mWhiteKingPiece && mBoard[xPosition][yPosition] != mRedKingPiece) {
+                    return true;
+                }
+                // Is red turn
+                if (isPlayerOneTurn) {
+                    if (mBoard[xPosition][yPosition] == mRedKingPiece || mBoard[xPosition][yPosition] == mRedPiece) {
+                        setRedSelectedPosition(xPosition, yPosition);
+                        invalidateView = true;
+                    }
+                }
+                // Is white turn
+                else if (!isPlayerOneTurn) {
+                    if (mBoard[xPosition][yPosition] == mWhiteKingPiece || mBoard[xPosition][yPosition] == mWhitePiece) {
+                        setWhiteSelectedPosition(xPosition, yPosition);
+                        invalidateView = true;
+                    }
+                }
+            }
+            // Reset the position, when piece is selected and selected the same again
+            else if (mBoard[xPosition][yPosition] == 5) {
+                clearSelectedPosition(xPosition, yPosition);
+                invalidate();
+                return true;
+            }
+            if(invalidateView){
+                invalidate();
+            }
             return true;
         }
         return true;
     }
+
+    /**
+     * This method responsible to reassign the previous value to the position
+     * @param xPosition
+     * @param yPosition
+     */
+    private void clearSelectedPosition(int xPosition, int yPosition) {
+        mBoard[xPosition][yPosition] = mSelectedPiece;
+        mXPreviousPosition = -3;
+        mYPreviousPosition = -3;
+        mSelectedPiece = -2;
+    }
+
+    /**
+     * This method responsible to assign the selected piece value of white piece and white king piece
+     * @param xPosition
+     * @param yPosition
+     */
+    private void setWhiteSelectedPosition(int xPosition, int yPosition) {
+        mXPreviousPosition = xPosition;
+        mYPreviousPosition = yPosition;
+        mSelectedPiece = mBoard[xPosition][yPosition];
+        mBoard[xPosition][yPosition] = 5;
+    }
+
+    /**
+     * This method responsible to assign the selected piece value of red piece and red king piece
+     * @param xPosition
+     * @param yPosition
+     */
+    private void setRedSelectedPosition(int xPosition, int yPosition) {
+        mXPreviousPosition = xPosition;
+        mYPreviousPosition = yPosition;
+        mSelectedPiece = mBoard[xPosition][yPosition];
+        mBoard[xPosition][yPosition] = 5;
+    }
+
 }
