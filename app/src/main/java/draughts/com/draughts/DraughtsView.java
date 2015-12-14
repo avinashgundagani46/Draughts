@@ -223,6 +223,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 else if (!isPlayerOneTurn) {
                     if (mBoard[xPosition][yPosition] == mWhiteKingPiece || mBoard[xPosition][yPosition] == mWhitePiece) {
                         setWhiteSelectedPosition(xPosition, yPosition);
+                        getMovablePositionsForWhite(xPosition, yPosition);
                         invalidateView = true;
                     }
                 }
@@ -234,6 +235,25 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 invalidate();
                 return true;
             }
+            // Check for piece movement and move to that position
+            if (mBoard[xPosition][yPosition] == mMovableValue) {
+                if (isPlayerOneTurn) {
+                    mBoard[xPosition][yPosition] = mSelectedPiece;
+                    if (xPosition == 0) {
+                        mBoard[xPosition][yPosition] = mRedKingPiece;
+                    }
+                } else {
+                    mBoard[xPosition][yPosition] = mSelectedPiece;
+                    if (xPosition == mBoardSize - 1) {
+                        mBoard[xPosition][yPosition] = mWhiteKingPiece;
+                    }
+                }
+                invalidateView = true;
+                mBoard[mXPreviousPosition][mYPreviousPosition] = mNoPiece;
+                resetMovablePositions();
+                isPlayerOneTurn = !isPlayerOneTurn;
+                mYPreviousPosition = -3;
+            }
             if (invalidateView) {
                 invalidate();
             }
@@ -242,6 +262,91 @@ public class DraughtsView extends View implements View.OnTouchListener {
         return true;
     }
 
+    /**
+     * This is responsible to get movable positions for white piece and white king piece
+     *
+     * @param xPosition
+     * @param yPosition
+     */
+    private void getMovablePositionsForWhite(int xPosition, int yPosition) {
+        if (mSelectedPiece == mWhiteKingPiece) {
+
+        }
+        getLeftMovablePositionsForWhite(xPosition, yPosition, false);
+        getRightMovablePositionsForWhite(xPosition, yPosition, false);
+    }
+
+    /**
+     * This is responsible to get right movable positions for white piece and white king piece
+     *
+     * @param xPosition
+     * @param yPosition
+     * @param isMovableMove
+     */
+    private void getRightMovablePositionsForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i < mBoardSize; i = i + 2) {
+            if (i + 1 < mBoardSize && j - 1 >= 0) {
+                // If red coin exists
+                if (mBoard[i + 1][j - 1] == mRedPiece || mBoard[i + 1][j - 1] == mRedKingPiece) {
+                    if (i + 2 < mBoardSize && j - 2 >= 0 && mBoard[i + 2][j - 2] == mNoPiece) {
+                        Log.i(TAG, "Right white:: mov: x: " + (i + 2) + " y:" + (j - 2));
+                        mBoard[i + 2][j - 2] = mMovableValue;
+                        getRightMovablePositionsForWhite(i + 2, j - 2, true);
+                        getLeftMovablePositionsForWhite(i + 2, j - 2, true);
+                    }
+                    return;
+                } else if (isMovableMove || mBoard[i + 1][j - 1] == mWhiteKingPiece || mBoard[i + 1][j - 1] == mWhitePiece)
+                    return;
+                else {
+                    Log.i(TAG, "Right white:: mov: x: " + (i + 1) + " y:" + (j - 1));
+                    mBoard[i + 1][j - 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j - 2;
+            if (j < 0 && i > mBoardSize - 1)
+                return;
+        }
+    }
+
+    /**
+     * This is responsible to get left movable positions for white piece and white king piece
+     *
+     * @param xPosition
+     * @param yPosition
+     * @param isMovableMove
+     */
+    private void getLeftMovablePositionsForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i < mBoardSize; i = i + 2) {
+            if (i + 1 < mBoardSize && j + 1 < mBoardSize) {
+                // If red peice exists
+                if (mBoard[i + 1][j + 1] == mRedPiece || mBoard[i + 1][j + 1] == mRedKingPiece) {
+                    if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mNoPiece) {
+                        Log.i(TAG, "Left white:: mov: x: " + (i + 2) + " y:" + (j + 2));
+                        mBoard[i + 2][j + 2] = mMovableValue;
+                        getRightMovablePositionsForWhite(i + 2, j + 2, true);
+                        getLeftMovablePositionsForWhite(i + 2, j + 2, true);
+                    }
+                    return;
+                } else if (isMovableMove || mBoard[i + 1][j + 1] == mWhiteKingPiece || mBoard[i + 1][j + 1] == mWhitePiece)
+                    return;
+                else {
+                    Log.i(TAG, "Left white:: mov: x: " + (i + 1) + " y:" + (j + 1));
+                    mBoard[i + 1][j + 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j + 2;
+            if (j > mBoardSize - 1 && i > mBoardSize - 1)
+                return;
+        }
+    }
+
+    /**
+     * To reset movable positions to no piece position
+     */
     private void resetMovablePositions() {
         for (int i = 0; i < mBoardSize; i++) {
             for (int j = 0; j < mBoardSize; j++) {
@@ -252,6 +357,12 @@ public class DraughtsView extends View implements View.OnTouchListener {
         }
     }
 
+    /**
+     * This is responsible to get movable positions for red piece and red king piece
+     *
+     * @param xPosition
+     * @param yPosition
+     */
     private void getMovablePositionsForRed(int xPosition, int yPosition) {
         if (mSelectedPiece == mRedKingPiece) {
 
@@ -260,20 +371,27 @@ public class DraughtsView extends View implements View.OnTouchListener {
         getRightMovablePositionsForRed(xPosition, yPosition, false);
     }
 
+    /**
+     * This is responsible to get left movable positions for red piece and red king piece
+     *
+     * @param xPosition
+     * @param yPosition
+     * @param isMovableMove
+     */
     private void getLeftMovablePositionsForRed(int xPosition, int yPosition, boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i >= 0; i = i - 2) {
             if (i - 1 >= 0 && j - 1 >= 0) {
-                // If red coin exists
-                if (mBoard[i - 1][j - 1] == mRedPiece || mBoard[i - 1][j - 1] == mRedKingPiece) {
+                // If white piece exists
+                if (mBoard[i - 1][j - 1] == mWhitePiece || mBoard[i - 1][j - 1] == mWhiteKingPiece) {
                     if (i - 2 >= 0 && j - 2 >= 0 && mBoard[i - 2][j - 2] == mNoPiece) {
                         Log.i(TAG, "Left red:: mov: x: " + (i - 2) + " y:" + (j - 2));
                         mBoard[i - 2][j - 2] = mMovableValue;
                         getRightMovablePositionsForRed(i - 2, j - 2, true);
                         getLeftMovablePositionsForRed(i - 2, j - 2, true);
-                        return;
                     }
-                } else if (isMovableMove || mBoard[i - 1][j - 1] == mWhitePiece || mBoard[i - 1][j - 1] == mWhiteKingPiece) {
+                    return;
+                } else if (isMovableMove || mBoard[i - 1][j - 1] == mRedPiece || mBoard[i - 1][j - 1] == mRedKingPiece) {
                     return;
                 } else {
                     Log.i(TAG, "Left red:: mov: x: " + (i - 1) + " y:" + (j - 1));
@@ -285,57 +403,29 @@ public class DraughtsView extends View implements View.OnTouchListener {
             if (j < 0 && i < 0)
                 return;
         }
-
-        /*for (int i = xPosition - 1; i >= 0; i--) {
-            for (int j = yPosition - 1; j >= 0; j--) {
-                Log.i(TAG, " X left:: " + i);
-                // If white coin exists
-                if (mBoard[i][j] == mWhitePiece) {
-                    if (i - 1 >= 0 && j - 1 >= 0) {
-                        // Check for empty space cross to this
-                        if ((mBoard[i - 1][j - 1] == mRedPiece || mBoard[i - 1][j - 1] == mRedKingPiece)) {
-                            return;
-                        } else {
-                            mBoard[i - 1][j - 1] = mMovableValue;
-                            getRightMovablePositionsForRed(i - 1, j - 1, true);
-                            getLeftMovablePositionsForRed(i - 1, j - 1, true);
-                            return;
-                        }
-                    }
-                }
-                // else, red coin exists
-                else if (mBoard[i][j] == mRedPiece) {
-                    return;
-                }
-                // Empty space;
-                else if (mBoard[i][j] != mMovableValue && mBoard[i][j] != mInValidPlace && !isMovableMove) {
-                    Log.i(TAG, "pOSS left: X:: " + (i) + " Y:: " + (j));
-                    mBoard[i][j] = mMovableValue;
-                    return;
-                }
-                // Possible value
-                else if (mBoard[i][j] == mMovableValue) {
-                    return;
-                }
-            }
-        }*/
-
     }
 
+    /**
+     * This is responsible to get right movable positions for red piece and red king piece
+     *
+     * @param xPosition
+     * @param yPosition
+     * @param isMovableMove
+     */
     private void getRightMovablePositionsForRed(int xPosition, int yPosition, boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i >= 0; i = i - 2) {
             if (i - 1 >= 0 && j + 1 < mBoardSize) {
-                // If red coin exists
-                if (mBoard[i - 1][j + 1] == mRedPiece || mBoard[i - 1][j + 1] == mRedKingPiece) {
+                // If white piece exists
+                if (mBoard[i - 1][j + 1] == mWhitePiece || mBoard[i - 1][j + 1] == mWhiteKingPiece) {
                     if (i - 2 >= 0 && j + 2 < mBoardSize && mBoard[i - 2][j + 2] == mNoPiece) {
                         Log.i(TAG, "Right red:: mov: x: " + (i - 2) + " y:" + (j + 2));
                         mBoard[i - 2][j + 2] = mMovableValue;
                         getRightMovablePositionsForRed(i - 2, j + 2, true);
                         getLeftMovablePositionsForRed(i - 2, j + 2, true);
-                        return;
                     }
-                } else if (isMovableMove || mBoard[i - 1][j + 1] == mWhitePiece || mBoard[i - 1][j + 1] == mWhiteKingPiece) {
+                    return;
+                } else if (isMovableMove || mBoard[i - 1][j + 1] == mRedPiece || mBoard[i - 1][j + 1] == mRedKingPiece) {
                     return;
                 } else {
                     Log.i(TAG, "Right red:: mov: x: " + (i - 1) + " y:" + (j + 1));
