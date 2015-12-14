@@ -239,11 +239,13 @@ public class DraughtsView extends View implements View.OnTouchListener {
             if (mBoard[xPosition][yPosition] == mMovableValue) {
                 if (isPlayerOneTurn) {
                     mBoard[xPosition][yPosition] = mSelectedPiece;
+                    clearPossibleWhitePieces(xPosition, yPosition);
                     if (xPosition == 0) {
                         mBoard[xPosition][yPosition] = mRedKingPiece;
                     }
                 } else {
                     mBoard[xPosition][yPosition] = mSelectedPiece;
+                    clearPossibleRedPieces(xPosition, yPosition);
                     if (xPosition == mBoardSize - 1) {
                         mBoard[xPosition][yPosition] = mWhiteKingPiece;
                     }
@@ -260,6 +262,76 @@ public class DraughtsView extends View implements View.OnTouchListener {
             return true;
         }
         return true;
+    }
+
+    /**
+     * This method is responsible to clear the possible red pieces based on player two move.
+     *
+     * @param xPosition
+     * @param yPosition
+     */
+    private void clearPossibleRedPieces(int xPosition, int yPosition) {
+        int j = yPosition;
+        for (int i = xPosition; i >= mXPreviousPosition; i = i - 2) {
+            // If white moves to right
+            if (yPosition < mYPreviousPosition && i - 1 >= 0 && j + 1 < mBoardSize
+                    && mBoard[i - 1][j + 1] != mWhitePiece && mBoard[i - 1][j + 1] != mWhiteKingPiece) {
+                mBoard[i - 1][j + 1] = mNoPiece;
+                j = j + 2;
+            }
+            // If white moves to left
+            else if (yPosition > mYPreviousPosition && i - 1 >= 0 && j - 1 >= 0
+                    && mBoard[i - 1][j - 1] != mWhitePiece && mBoard[i - 1][j - 1] != mWhiteKingPiece) {
+                mBoard[i - 1][j - 1] = mNoPiece;
+                j = j - 2;
+            } else if (mYPreviousPosition == yPosition) {
+                if (i - 2 >= 0 && j + 2 < mBoardSize && mBoard[i - 2][j + 2] == mMovableValue
+                        || mBoard[i - 2][j + 2] == mWhitePiece || mBoard[i - 2][j + 2] == mWhiteKingPiece) {
+                    mBoard[i - 1][j + 1] = mNoPiece;
+                    clearPossibleRedPieces(i - 2, j + 2);
+                } else if (i - 2 >= 0 && j - 2 >= 0 && mBoard[i - 2][j - 2] == mMovableValue
+                        || mBoard[i - 2][j - 2] == mWhitePiece || mBoard[i - 2][j - 2] == mWhiteKingPiece) {
+                    mBoard[i - 1][j - 1] = mNoPiece;
+                    clearPossibleRedPieces(i - 2, j - 2);
+                }
+            }
+        }
+    }
+
+    /**
+     * This method is responsible to clear the possible white pieces based on player one move.
+     *
+     * @param xPosition
+     * @param yPosition
+     */
+    private void clearPossibleWhitePieces(int xPosition, int yPosition) {
+        int j = yPosition;
+        for (int i = xPosition; i <= mXPreviousPosition; i = i + 2) {
+            // If red moves to right
+            if (mYPreviousPosition > yPosition && i + 1 < mBoardSize && j + 1 < mBoardSize
+                    && mBoard[i + 1][j + 1] != mRedPiece && mBoard[i + 1][j + 1] != mRedKingPiece) {
+                mBoard[i + 1][j + 1] = mNoPiece;
+                j = j + 2;
+            }
+            // If red moves to left
+            else if (mYPreviousPosition < yPosition && i + 1 < mBoardSize && j - 1 >= 0
+                    && mBoard[i + 1][j - 1] != mRedPiece && mBoard[i + 1][j - 1] != mRedKingPiece) {
+                mBoard[i + 1][j - 1] = mNoPiece;
+                j = j - 2;
+            }
+            // If Previous and present x position is same, then take right as priority and take that route
+            else if (mYPreviousPosition == yPosition) {
+                if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mMovableValue
+                        || mBoard[i + 2][j + 2] == mRedPiece || mBoard[i + 2][j + 2] == mRedKingPiece) {
+                    mBoard[i + 1][j + 1] = mNoPiece;
+                    clearPossibleWhitePieces(i + 2, j + 2);
+                } else if (i + 2 < mMovableValue && j - 2 >= 0 && mBoard[i + 2][j - 2] == mMovableValue
+                        || mBoard[i + 2][j - 2] == mRedPiece || mBoard[i + 2][j - 2] == mRedPiece) {
+                    mBoard[i + 1][j - 1] = mNoPiece;
+                    clearPossibleWhitePieces(i + 2, j - 2);
+                }
+            }
+        }
     }
 
     /**
