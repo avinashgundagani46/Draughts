@@ -40,6 +40,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
     private boolean isPlayerOneTurn = true;
     private boolean invalidateView = false;
     private Paint mSelectedPaint = new Paint();
+    private int mMovableValue = 6;
 
     public DraughtsView(Context context) {
         super(context);
@@ -144,7 +145,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
                     rect = new Rect(mHeightOfCell * y, mHeightOfCell * x, mHeightOfCell * y + mHeightOfCell, mHeightOfCell * x + mHeightOfCell);
                     canvas.drawRect(rect, mSelectedPaint);
                 }
-               // If it is white piece
+                // If it is white piece
                 if (mBoard[x][y] == mWhitePiece || (5 == mBoard[x][y] && mSelectedPiece == mWhitePiece)) {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mWhitePaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mBlackStroke);
@@ -158,10 +159,10 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 else if (mBoard[x][y] == mWhiteKingPiece || (5 == mBoard[x][y] && mSelectedPiece == mWhiteKingPiece)) {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 - mHeightOfCell / 10, mHeightOfCell / 4, mWhitePaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 - mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
-                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 , mHeightOfCell / 4, mWhitePaint);
-                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 , mHeightOfCell / 4, mBlackStroke);
-                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2+ mHeightOfCell / 10, mHeightOfCell / 4, mWhitePaint);
-                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2+ mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
+                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mWhitePaint);
+                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mBlackStroke);
+                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 + mHeightOfCell / 10, mHeightOfCell / 4, mWhitePaint);
+                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 + mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
                 }
                 // If it is red king
                 else if (mBoard[x][y] == mRedKingPiece || (5 == mBoard[x][y] && mSelectedPiece == mRedKingPiece)) {
@@ -171,6 +172,11 @@ public class DraughtsView extends View implements View.OnTouchListener {
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 4, mBlackStroke);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 + mHeightOfCell / 10, mHeightOfCell / 4, mRedPaint);
                     canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2 + mHeightOfCell / 10, mHeightOfCell / 4, mBlackStroke);
+                }
+
+                // If it is movable positions
+                if (mBoard[x][y] == mMovableValue) {
+                    canvas.drawCircle(mHeightOfCell / 2 * (y * 2) + mHeightOfCell / 2, mHeightOfCell / 2 * (x * 2) + mHeightOfCell / 2, mHeightOfCell / 6, mSelectedPaint);
                 }
             }
         }
@@ -209,6 +215,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 if (isPlayerOneTurn) {
                     if (mBoard[xPosition][yPosition] == mRedKingPiece || mBoard[xPosition][yPosition] == mRedPiece) {
                         setRedSelectedPosition(xPosition, yPosition);
+                        getMovablePositionsForRed(xPosition, yPosition);
                         invalidateView = true;
                     }
                 }
@@ -223,10 +230,11 @@ public class DraughtsView extends View implements View.OnTouchListener {
             // Reset the position, when piece is selected and selected the same again
             else if (mBoard[xPosition][yPosition] == 5) {
                 clearSelectedPosition(xPosition, yPosition);
+                resetMovablePositions();
                 invalidate();
                 return true;
             }
-            if(invalidateView){
+            if (invalidateView) {
                 invalidate();
             }
             return true;
@@ -234,8 +242,116 @@ public class DraughtsView extends View implements View.OnTouchListener {
         return true;
     }
 
+    private void resetMovablePositions() {
+        for (int i = 0; i < mBoardSize; i++) {
+            for (int j = 0; j < mBoardSize; j++) {
+                if (mBoard[i][j] == mMovableValue) {
+                    mBoard[i][j] = mNoPiece;
+                }
+            }
+        }
+    }
+
+    private void getMovablePositionsForRed(int xPosition, int yPosition) {
+        if (mSelectedPiece == mRedKingPiece) {
+
+        }
+        getLeftMovablePositionsForRed(xPosition, yPosition, false);
+        getRightMovablePositionsForRed(xPosition, yPosition, false);
+    }
+
+    private void getLeftMovablePositionsForRed(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i >= 0; i = i - 2) {
+            if (i - 1 >= 0 && j - 1 >= 0) {
+                // If red coin exists
+                if (mBoard[i - 1][j - 1] == mRedPiece || mBoard[i - 1][j - 1] == mRedKingPiece) {
+                    if (i - 2 >= 0 && j - 2 >= 0 && mBoard[i - 2][j - 2] == mNoPiece) {
+                        Log.i(TAG, "Left red:: mov: x: " + (i - 2) + " y:" + (j - 2));
+                        mBoard[i - 2][j - 2] = mMovableValue;
+                        getRightMovablePositionsForRed(i - 2, j - 2, true);
+                        getLeftMovablePositionsForRed(i - 2, j - 2, true);
+                        return;
+                    }
+                } else if (isMovableMove || mBoard[i - 1][j - 1] == mWhitePiece || mBoard[i - 1][j - 1] == mWhiteKingPiece) {
+                    return;
+                } else {
+                    Log.i(TAG, "Left red:: mov: x: " + (i - 1) + " y:" + (j - 1));
+                    mBoard[i - 1][j - 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j - 2;
+            if (j < 0 && i < 0)
+                return;
+        }
+
+        /*for (int i = xPosition - 1; i >= 0; i--) {
+            for (int j = yPosition - 1; j >= 0; j--) {
+                Log.i(TAG, " X left:: " + i);
+                // If white coin exists
+                if (mBoard[i][j] == mWhitePiece) {
+                    if (i - 1 >= 0 && j - 1 >= 0) {
+                        // Check for empty space cross to this
+                        if ((mBoard[i - 1][j - 1] == mRedPiece || mBoard[i - 1][j - 1] == mRedKingPiece)) {
+                            return;
+                        } else {
+                            mBoard[i - 1][j - 1] = mMovableValue;
+                            getRightMovablePositionsForRed(i - 1, j - 1, true);
+                            getLeftMovablePositionsForRed(i - 1, j - 1, true);
+                            return;
+                        }
+                    }
+                }
+                // else, red coin exists
+                else if (mBoard[i][j] == mRedPiece) {
+                    return;
+                }
+                // Empty space;
+                else if (mBoard[i][j] != mMovableValue && mBoard[i][j] != mInValidPlace && !isMovableMove) {
+                    Log.i(TAG, "pOSS left: X:: " + (i) + " Y:: " + (j));
+                    mBoard[i][j] = mMovableValue;
+                    return;
+                }
+                // Possible value
+                else if (mBoard[i][j] == mMovableValue) {
+                    return;
+                }
+            }
+        }*/
+
+    }
+
+    private void getRightMovablePositionsForRed(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i >= 0; i = i - 2) {
+            if (i - 1 >= 0 && j + 1 < mBoardSize) {
+                // If red coin exists
+                if (mBoard[i - 1][j + 1] == mRedPiece || mBoard[i - 1][j + 1] == mRedKingPiece) {
+                    if (i - 2 >= 0 && j + 2 < mBoardSize && mBoard[i - 2][j + 2] == mNoPiece) {
+                        Log.i(TAG, "Right red:: mov: x: " + (i - 2) + " y:" + (j + 2));
+                        mBoard[i - 2][j + 2] = mMovableValue;
+                        getRightMovablePositionsForRed(i - 2, j + 2, true);
+                        getLeftMovablePositionsForRed(i - 2, j + 2, true);
+                        return;
+                    }
+                } else if (isMovableMove || mBoard[i - 1][j + 1] == mWhitePiece || mBoard[i - 1][j + 1] == mWhiteKingPiece) {
+                    return;
+                } else {
+                    Log.i(TAG, "Right red:: mov: x: " + (i - 1) + " y:" + (j + 1));
+                    mBoard[i - 1][j + 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j + 2;
+            if (j > mBoardSize - 1 && i < 0)
+                return;
+        }
+    }
+
     /**
      * This method responsible to reassign the previous value to the position
+     *
      * @param xPosition
      * @param yPosition
      */
@@ -248,6 +364,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
 
     /**
      * This method responsible to assign the selected piece value of white piece and white king piece
+     *
      * @param xPosition
      * @param yPosition
      */
@@ -260,6 +377,7 @@ public class DraughtsView extends View implements View.OnTouchListener {
 
     /**
      * This method responsible to assign the selected piece value of red piece and red king piece
+     *
      * @param xPosition
      * @param yPosition
      */
