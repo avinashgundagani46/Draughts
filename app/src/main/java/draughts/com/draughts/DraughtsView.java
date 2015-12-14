@@ -342,10 +342,65 @@ public class DraughtsView extends View implements View.OnTouchListener {
      */
     private void getMovablePositionsForWhite(int xPosition, int yPosition) {
         if (mSelectedPiece == mWhiteKingPiece) {
-
+            getLeftBackMovesForWhite(xPosition, yPosition, false);
+            getRightBackMovesForWhite(xPosition, yPosition, false);
         }
         getLeftMovablePositionsForWhite(xPosition, yPosition, false);
         getRightMovablePositionsForWhite(xPosition, yPosition, false);
+    }
+
+    private void getLeftBackMovesForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i < mBoardSize; i = i + 2) {
+            if (i + 1 < mBoardSize && j + 1 < mBoardSize) {
+                // If red peice exists
+                if (mBoard[i + 1][j + 1] == mRedPiece || mBoard[i + 1][j + 1] == mRedKingPiece) {
+                    if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mNoPiece) {
+                        Log.i(TAG, "Back right white:: mov: x: " + (i + 2) + " y:" + (j + 2));
+                        mBoard[i + 2][j + 2] = mMovableValue;
+                        getRightBackMovesForWhite(i + 2, j + 2, true);
+                        getLeftBackMovesForWhite(i + 2, j + 2, true);
+                    }
+                    return;
+                } else if (isMovableMove || mBoard[i + 1][j + 1] == mWhiteKingPiece || mBoard[i + 1][j + 1] == mWhitePiece)
+                    return;
+                else {
+                    Log.i(TAG, "Back right white:: mov: x: " + (i + 1) + " y:" + (j + 1));
+                    mBoard[i + 1][j + 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j + 2;
+            if (j > mBoardSize - 1 && i > mBoardSize - 1)
+                return;
+        }
+    }
+
+    private void getRightBackMovesForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i >= 0; i = i - 2) {
+            if (i - 1 >= 0 && j - 1 >= 0) {
+                // If red piece exists
+                if (mBoard[i - 1][j - 1] == mRedPiece || mBoard[i - 1][j - 1] == mRedKingPiece) {
+                    if (i - 2 >= 0 && j - 2 >= 0 && mBoard[i - 2][j - 2] == mNoPiece) {
+                        Log.i(TAG, "Back left white:: mov: x: " + (i - 2) + " y:" + (j - 2));
+                        mBoard[i - 2][j - 2] = mMovableValue;
+                        getRightBackMovesForWhite(i - 2, j - 2, true);
+                        getLeftBackMovesForWhite(i - 2, j - 2, true);
+                    }
+                    return;
+                } else if (isMovableMove || mBoard[i - 1][j - 1] == mWhitePiece || mBoard[i - 1][j - 1] == mWhiteKingPiece) {
+                    return;
+                } else {
+                    Log.i(TAG, "Back left white:: mov: x: " + (i - 1) + " y:" + (j - 1));
+                    mBoard[i - 1][j - 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j - 2;
+            if (j < 0 && i < 0)
+                return;
+        }
     }
 
     /**
@@ -437,10 +492,65 @@ public class DraughtsView extends View implements View.OnTouchListener {
      */
     private void getMovablePositionsForRed(int xPosition, int yPosition) {
         if (mSelectedPiece == mRedKingPiece) {
-
+            getLeftBackMovesForRed(xPosition, yPosition, false);
+            getRightBackMovesForRed(xPosition, yPosition, false);
         }
         getLeftMovablePositionsForRed(xPosition, yPosition, false);
         getRightMovablePositionsForRed(xPosition, yPosition, false);
+    }
+
+    private void getRightBackMovesForRed(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i < mBoardSize; i = i + 2) {
+            if (i + 1 < mBoardSize && j + 1 < mBoardSize) {
+                // If white peice exists
+                if (mBoard[i + 1][j + 1] == mWhitePiece || mBoard[i + 1][j + 1] == mWhiteKingPiece) {
+                    if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mNoPiece) {
+                        Log.i(TAG, "Left white:: mov: x: " + (i + 2) + " y:" + (j + 2));
+                        mBoard[i + 2][j + 2] = mMovableValue;
+                        getRightBackMovesForRed(i + 2, j + 2, true);
+                        getLeftBackMovesForRed(i + 2, j + 2, true);
+                    }
+                    return;
+                } else if (isMovableMove || mBoard[i + 1][j + 1] == mRedKingPiece || mBoard[i + 1][j + 1] == mRedPiece)
+                    return;
+                else {
+                    Log.i(TAG, "Left white:: mov: x: " + (i + 1) + " y:" + (j + 1));
+                    mBoard[i + 1][j + 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j + 2;
+            if (j > mBoardSize - 1 && i > mBoardSize - 1)
+                return;
+        }
+    }
+
+    private void getLeftBackMovesForRed(int xPosition, int yPosition, boolean isMovableMove) {
+        int j = yPosition;
+        for (int i = xPosition; i < mBoardSize; i = i + 2) {
+            if (i + 1 < mBoardSize && j - 1 >= 0) {
+                // If white coin exists
+                if (mBoard[i + 1][j - 1] == mWhitePiece || mBoard[i + 1][j - 1] == mWhiteKingPiece) {
+                    if (i + 2 < mBoardSize && j - 2 >= 0 && mBoard[i + 2][j - 2] == mNoPiece) {
+                        Log.i(TAG, "Back Right red:: mov: x: " + (i + 2) + " y:" + (j - 2));
+                        mBoard[i + 2][j - 2] = mMovableValue;
+                        getRightBackMovesForRed(i + 2, j - 2, true);
+                        getLeftBackMovesForRed(i + 2, j - 2, true);
+                    }
+                    return;
+                } else if (isMovableMove || mBoard[i + 1][j - 1] == mRedKingPiece || mBoard[i + 1][j - 1] == mRedPiece)
+                    return;
+                else {
+                    Log.i(TAG, "Back left white:: mov: x: " + (i + 1) + " y:" + (j - 1));
+                    mBoard[i + 1][j - 1] = mMovableValue;
+                    return;
+                }
+            }
+            j = j - 2;
+            if (j < 0 && i > mBoardSize - 1)
+                return;
+        }
     }
 
     /**
