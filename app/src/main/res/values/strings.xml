@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Draughts</string>
+    <string name="lbl_reset_game">RESET GAME</string>
+    <string name="lbl_board_size">Board size:</string>
+    <string name="lbl_min_size_board">8</string>
+    <string name="lbl_max_size_board">20</string>
 </resources>

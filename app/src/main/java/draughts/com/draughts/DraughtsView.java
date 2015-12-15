@@ -13,6 +13,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 
 public class DraughtsView extends View implements View.OnTouchListener {
     private Context mContext;
@@ -64,7 +65,6 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 .getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         mViewHeight = display.getWidth();
-        mHeightOfCell = mViewHeight / mBoardSize;
 
         mBlackStroke.setColor(Color.BLACK);
         mBlackStroke.setStrokeWidth(3);
@@ -84,6 +84,11 @@ public class DraughtsView extends View implements View.OnTouchListener {
 
     private void resetBoard() {
         mBoard = new int[mBoardSize][mBoardSize];
+        mYPreviousPosition = -3;
+        mXPreviousPosition = -3;
+        isPlayerOneTurn = true;
+        invalidateView = false;
+        mHeightOfCell = mViewHeight / mBoardSize;
         for (int i = 0; i < mBoard.length; i++) {
             for (int j = 0; j < mBoard.length; j++) {
                 // Player one possible places
@@ -240,12 +245,14 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 if (isPlayerOneTurn) {
                     mBoard[xPosition][yPosition] = mSelectedPiece;
                     clearPossibleWhitePieces(xPosition, yPosition);
+                    clearBackPossibleWhitePieces(xPosition, yPosition);
                     if (xPosition == 0) {
                         mBoard[xPosition][yPosition] = mRedKingPiece;
                     }
                 } else {
                     mBoard[xPosition][yPosition] = mSelectedPiece;
                     clearPossibleRedPieces(xPosition, yPosition);
+                    clearBackPossibleRedPieces(xPosition, yPosition);
                     if (xPosition == mBoardSize - 1) {
                         mBoard[xPosition][yPosition] = mWhiteKingPiece;
                     }
@@ -262,6 +269,72 @@ public class DraughtsView extends View implements View.OnTouchListener {
             return true;
         }
         return true;
+    }
+
+    private void clearBackPossibleRedPieces(int xPosition, int yPosition) {
+        if (mSelectedPiece != mWhiteKingPiece) {
+            return;
+        }
+        int j = yPosition;
+        for (int i = xPosition; i <= mXPreviousPosition; i = i + 2) {
+            // If white moves to right
+            if (mYPreviousPosition > yPosition && i + 1 < mBoardSize && j + 1 < mBoardSize) {
+                mBoard[i + 1][j + 1] = mNoPiece;
+                j = j + 2;
+            }
+            // If white moves to left
+            else if (mYPreviousPosition < yPosition && i + 1 < mBoardSize && j - 1 >= 0) {
+                mBoard[i + 1][j - 1] = mNoPiece;
+                j = j - 2;
+            }
+            // If Previous and present x position is same, then take right as priority and take that route
+            else if (mYPreviousPosition == yPosition) {
+                if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mMovableValue
+                        || mBoard[i + 2][j + 2] == mWhiteKingPiece) {
+                    mBoard[i + 1][j + 1] = mNoPiece;
+                    clearBackPossibleRedPieces(i + 2, j + 2);
+                } else if (i + 2 < mBoardSize && j - 2 >= 0 && mBoard[i + 2][j - 2] == mMovableValue
+                        || mBoard[i + 2][j - 2] == mWhiteKingPiece) {
+                    mBoard[i + 1][j - 1] = mNoPiece;
+                    clearBackPossibleRedPieces(i + 2, j - 2);
+                }
+            }
+        }
+    }
+
+    private void clearBackPossibleWhitePieces(int xPosition, int yPosition) {
+        if (mSelectedPiece != mRedKingPiece) {
+            return;
+        }
+        int j = yPosition;
+        for (int i = xPosition; i >= mXPreviousPosition; i = i - 2) {
+            // If red moves to right
+            if (yPosition < mYPreviousPosition && i - 1 >= 0 && j + 1 < mBoardSize
+                    && mBoard[i - 1][j + 1] != mRedKingPiece) {
+                mBoard[i - 1][j + 1] = mNoPiece;
+                j = j + 2;
+            }
+            // If red moves to left
+            else if (yPosition > mYPreviousPosition && i - 1 >= 0 && j - 1 >= 0
+                    && mBoard[i - 1][j - 1] != mRedKingPiece) {
+                mBoard[i - 1][j - 1] = mNoPiece;
+                j = j - 2;
+            } else if (mYPreviousPosition == yPosition) {
+                if (i - 2 >= 0 && j + 2 < mBoardSize) {
+                    if (mBoard[i - 2][j + 2] == mMovableValue
+                            || mBoard[i - 2][j + 2] == mRedKingPiece) {
+                        mBoard[i - 1][j + 1] = mNoPiece;
+                        clearBackPossibleWhitePieces(i - 2, j + 2);
+                    } else if (i - 2 >= 0 && j - 2 >= 0) {
+                        if (mBoard[i - 2][j - 2] == mMovableValue
+                                || mBoard[i - 2][j - 2] == mRedKingPiece) {
+                            mBoard[i - 1][j - 1] = mNoPiece;
+                            clearBackPossibleWhitePieces(i - 2, j - 2);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -376,7 +449,8 @@ public class DraughtsView extends View implements View.OnTouchListener {
         }
     }
 
-    private void getRightBackMovesForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+    private void getRightBackMovesForWhite(int xPosition, int yPosition,
+                                           boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i >= 0; i = i - 2) {
             if (i - 1 >= 0 && j - 1 >= 0) {
@@ -410,7 +484,8 @@ public class DraughtsView extends View implements View.OnTouchListener {
      * @param yPosition
      * @param isMovableMove
      */
-    private void getRightMovablePositionsForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+    private void getRightMovablePositionsForWhite(int xPosition, int yPosition,
+                                                  boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i < mBoardSize; i = i + 2) {
             if (i + 1 < mBoardSize && j - 1 >= 0) {
@@ -444,7 +519,8 @@ public class DraughtsView extends View implements View.OnTouchListener {
      * @param yPosition
      * @param isMovableMove
      */
-    private void getLeftMovablePositionsForWhite(int xPosition, int yPosition, boolean isMovableMove) {
+    private void getLeftMovablePositionsForWhite(int xPosition, int yPosition,
+                                                 boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i < mBoardSize; i = i + 2) {
             if (i + 1 < mBoardSize && j + 1 < mBoardSize) {
@@ -560,7 +636,8 @@ public class DraughtsView extends View implements View.OnTouchListener {
      * @param yPosition
      * @param isMovableMove
      */
-    private void getLeftMovablePositionsForRed(int xPosition, int yPosition, boolean isMovableMove) {
+    private void getLeftMovablePositionsForRed(int xPosition, int yPosition,
+                                               boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i >= 0; i = i - 2) {
             if (i - 1 >= 0 && j - 1 >= 0) {
@@ -594,7 +671,8 @@ public class DraughtsView extends View implements View.OnTouchListener {
      * @param yPosition
      * @param isMovableMove
      */
-    private void getRightMovablePositionsForRed(int xPosition, int yPosition, boolean isMovableMove) {
+    private void getRightMovablePositionsForRed(int xPosition, int yPosition,
+                                                boolean isMovableMove) {
         int j = yPosition;
         for (int i = xPosition; i >= 0; i = i - 2) {
             if (i - 1 >= 0 && j + 1 < mBoardSize) {
@@ -660,4 +738,17 @@ public class DraughtsView extends View implements View.OnTouchListener {
         mBoard[xPosition][yPosition] = 5;
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) this.getLayoutParams();
+        params.height = mViewHeight;
+        this.setLayoutParams(params);
+    }
+
+    public void resetGame(int size) {
+        mBoardSize = size;
+        resetBoard();
+        invalidate();
+    }
 }

@@ -6,7 +6,34 @@
     tools:context=".MainActivity">
 
     <draughts.com.draughts.DraughtsView
+        android:id="@+id/draught_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <Button
+        android:id="@+id/btn_reset_game"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/draught_view"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="@string/lbl_reset_game" />
+
+    <TextView
+        android:id="@+id/tv_board_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_reset_game"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:text="@string/lbl_board_size" />
+
+    <EditText
+        android:id="@+id/et_board_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tv_board_size"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_toRightOf="@+id/tv_board_size"
+        android:inputType="number"
+        android:maxLength="2"
+        android:text="@string/lbl_min_size_board" />
 </RelativeLayout>
