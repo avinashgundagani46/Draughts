@@ -424,27 +424,27 @@ public class DraughtsView extends View implements View.OnTouchListener {
 
     private void getLeftBackMovesForWhite(int xPosition, int yPosition, boolean isMovableMove) {
         int j = yPosition;
-        for (int i = xPosition; i < mBoardSize; i = i + 2) {
-            if (i + 1 < mBoardSize && j + 1 < mBoardSize) {
-                // If red peice exists
-                if (mBoard[i + 1][j + 1] == mRedPiece || mBoard[i + 1][j + 1] == mRedKingPiece) {
-                    if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mNoPiece) {
-                        Log.i(TAG, "Back right white:: mov: x: " + (i + 2) + " y:" + (j + 2));
-                        mBoard[i + 2][j + 2] = mMovableValue;
-                        getRightBackMovesForWhite(i + 2, j + 2, true);
-                        getLeftBackMovesForWhite(i + 2, j + 2, true);
+        for (int i = xPosition; i >= 0; i = i - 2) {
+            if (i - 1 >= 0 && j + 1 < mBoardSize) {
+                // If white piece exists
+                if (mBoard[i - 1][j + 1] == mRedPiece || mBoard[i - 1][j + 1] == mRedKingPiece) {
+                    if (i - 2 >= 0 && j + 2 < mBoardSize && mBoard[i - 2][j + 2] == mNoPiece) {
+                        Log.i(TAG, "Back left white:: mov: x: " + (i - 2) + " y:" + (j + 2));
+                        mBoard[i - 2][j + 2] = mMovableValue;
+                        getRightBackMovesForWhite(i - 2, j + 2, true);
+                        getLeftBackMovesForWhite(i - 2, j + 2, true);
                     }
                     return;
-                } else if (isMovableMove || mBoard[i + 1][j + 1] == mWhiteKingPiece || mBoard[i + 1][j + 1] == mWhitePiece)
+                } else if (isMovableMove || mBoard[i - 1][j + 1] == mWhitePiece || mBoard[i - 1][j + 1] == mWhiteKingPiece) {
                     return;
-                else {
-                    Log.i(TAG, "Back right white:: mov: x: " + (i + 1) + " y:" + (j + 1));
-                    mBoard[i + 1][j + 1] = mMovableValue;
+                } else {
+                    Log.i(TAG, "Back left white:: mov: x: " + (i - 1) + " y:" + (j + 1));
+                    mBoard[i - 1][j + 1] = mMovableValue;
                     return;
                 }
             }
             j = j + 2;
-            if (j > mBoardSize - 1 && i > mBoardSize - 1)
+            if (j > mBoardSize - 1 && i < 0)
                 return;
         }
     }
