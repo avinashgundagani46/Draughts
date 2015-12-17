@@ -289,14 +289,18 @@ public class DraughtsView extends View implements View.OnTouchListener {
             }
             // If Previous and present x position is same, then take right as priority and take that route
             else if (mYPreviousPosition == yPosition) {
-                if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mMovableValue
-                        || mBoard[i + 2][j + 2] == mWhiteKingPiece) {
-                    mBoard[i + 1][j + 1] = mNoPiece;
-                    clearBackPossibleRedPieces(i + 2, j + 2);
-                } else if (i + 2 < mBoardSize && j - 2 >= 0 && mBoard[i + 2][j - 2] == mMovableValue
-                        || mBoard[i + 2][j - 2] == mWhiteKingPiece) {
-                    mBoard[i + 1][j - 1] = mNoPiece;
-                    clearBackPossibleRedPieces(i + 2, j - 2);
+                if (i + 2 < mBoardSize && j + 2 < mBoardSize) {
+                    if (mBoard[i + 2][j + 2] == mMovableValue
+                            || mBoard[i + 2][j + 2] == mWhiteKingPiece) {
+                        mBoard[i + 1][j + 1] = mNoPiece;
+                        clearBackPossibleRedPieces(i + 2, j + 2);
+                    }
+                } else if (i + 2 < mBoardSize && j - 2 >= 0) {
+                    if (mBoard[i + 2][j - 2] == mMovableValue
+                            || mBoard[i + 2][j - 2] == mWhiteKingPiece) {
+                        mBoard[i + 1][j - 1] = mNoPiece;
+                        clearBackPossibleRedPieces(i + 2, j - 2);
+                    }
                 }
             }
         }
@@ -358,14 +362,18 @@ public class DraughtsView extends View implements View.OnTouchListener {
                 mBoard[i - 1][j - 1] = mNoPiece;
                 j = j - 2;
             } else if (mYPreviousPosition == yPosition) {
-                if (i - 2 >= 0 && j + 2 < mBoardSize && mBoard[i - 2][j + 2] == mMovableValue
-                        || mBoard[i - 2][j + 2] == mWhitePiece || mBoard[i - 2][j + 2] == mWhiteKingPiece) {
-                    mBoard[i - 1][j + 1] = mNoPiece;
-                    clearPossibleRedPieces(i - 2, j + 2);
-                } else if (i - 2 >= 0 && j - 2 >= 0 && mBoard[i - 2][j - 2] == mMovableValue
-                        || mBoard[i - 2][j - 2] == mWhitePiece || mBoard[i - 2][j - 2] == mWhiteKingPiece) {
-                    mBoard[i - 1][j - 1] = mNoPiece;
-                    clearPossibleRedPieces(i - 2, j - 2);
+                if (i - 2 >= 0 && j + 2 < mBoardSize) {
+                    if (mBoard[i - 2][j + 2] == mMovableValue
+                            || mBoard[i - 2][j + 2] == mWhitePiece || mBoard[i - 2][j + 2] == mWhiteKingPiece) {
+                        mBoard[i - 1][j + 1] = mNoPiece;
+                        clearPossibleRedPieces(i - 2, j + 2);
+                    }
+                } else if (i - 2 >= 0 && j - 2 >= 0) {
+                    if (mBoard[i - 2][j - 2] == mMovableValue
+                            || mBoard[i - 2][j - 2] == mWhitePiece || mBoard[i - 2][j - 2] == mWhiteKingPiece) {
+                        mBoard[i - 1][j - 1] = mNoPiece;
+                        clearPossibleRedPieces(i - 2, j - 2);
+                    }
                 }
             }
         }
@@ -394,14 +402,18 @@ public class DraughtsView extends View implements View.OnTouchListener {
             }
             // If Previous and present x position is same, then take right as priority and take that route
             else if (mYPreviousPosition == yPosition) {
-                if (i + 2 < mBoardSize && j + 2 < mBoardSize && mBoard[i + 2][j + 2] == mMovableValue
-                        || mBoard[i + 2][j + 2] == mRedPiece || mBoard[i + 2][j + 2] == mRedKingPiece) {
-                    mBoard[i + 1][j + 1] = mNoPiece;
-                    clearPossibleWhitePieces(i + 2, j + 2);
-                } else if (i + 2 < mMovableValue && j - 2 >= 0 && mBoard[i + 2][j - 2] == mMovableValue
-                        || mBoard[i + 2][j - 2] == mRedPiece || mBoard[i + 2][j - 2] == mRedPiece) {
-                    mBoard[i + 1][j - 1] = mNoPiece;
-                    clearPossibleWhitePieces(i + 2, j - 2);
+                if (i + 2 < mBoardSize && j + 2 < mBoardSize) {
+                    if (mBoard[i + 2][j + 2] == mMovableValue
+                            || mBoard[i + 2][j + 2] == mRedPiece || mBoard[i + 2][j + 2] == mRedKingPiece) {
+                        mBoard[i + 1][j + 1] = mNoPiece;
+                        clearPossibleWhitePieces(i + 2, j + 2);
+                    }
+                } else if (i + 2 < mMovableValue && j - 2 >= 0) {
+                    if (mBoard[i + 2][j - 2] == mMovableValue
+                            || mBoard[i + 2][j - 2] == mRedPiece || mBoard[i + 2][j - 2] == mRedPiece) {
+                        mBoard[i + 1][j - 1] = mNoPiece;
+                        clearPossibleWhitePieces(i + 2, j - 2);
+                    }
                 }
             }
         }
